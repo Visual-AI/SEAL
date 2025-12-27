@@ -85,41 +85,6 @@ class vit_threeHeads_v2(nn.Module):
         return (order_proj, order_out), (family_proj, family_out), (species_proj, species_out)
         
 
-class vit_threeHeads_v2_mlp(nn.Module):
-    def __init__(self, backbone, in_dim, num_class, num_superclass, num_fine, use_bn=False, norm_last_layer=True, 
-                 nlayers=3, hidden_dim=2048, bottleneck_dim=256, granularity=3, feature_size=768, num_layers = 1):
-        super().__init__()
-        self.backbone = backbone
-        self.feature_size = feature_size
-        self.features = Mlp(in_dim=in_dim, out_dim=feature_size, nlayers=num_layers)
-        
-        self.in_dim = in_dim
-        
-        self.projector_super = DINOHead(in_dim=feature_size, out_dim=num_superclass, nlayers=nlayers)
-        self.projector_class = DINOHead(in_dim=feature_size//3 * 2, out_dim=num_class, nlayers=nlayers)
-        self.projector_fine = DINOHead(in_dim=feature_size//3, out_dim=num_fine, nlayers=nlayers)
-    
-    def forward(self, x):
-        feat = self.backbone(x)
-        
-        feat = self.features(feat)
-        
-        feat_1 =  feat[:,  0:self.feature_size//3]
-        feat_2 =  feat[:,self.feature_size//3 : self.feature_size// 3 * 2]
-        feat_3 =  feat[:,self.feature_size// 3 * 2 : self.feature_size]
-        
-        order_input  = torch.cat([feat_1, feat_2.detach(),feat_3.detach()],1)
-        family_input = torch.cat([     feat_2,feat_3.detach()],1)
-        species_input = feat_3
-
-        order_proj, order_out = self.projector_super(order_input)
-        family_proj, family_out = self.projector_class(family_input)
-        species_proj, species_out = self.projector_fine(species_input)
-        
-        return (order_proj, order_out), (family_proj, family_out), (species_proj, species_out)
-
-
-
 class DINOHead(nn.Module):
     def __init__(self, in_dim, out_dim, use_bn=False, norm_last_layer=True, 
                  nlayers=3, hidden_dim=2048, bottleneck_dim=256):
