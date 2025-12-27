@@ -1,12 +1,9 @@
 #!/bin/bash
 
-
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:64
 
-
-
 python train_seal.py \
-    --dataset_name 'scars' \
+    --dataset_name 'aircraft' \
     --batch_size 128 \
     --grad_from_block 10 \
     --epochs 200 \
@@ -21,14 +18,11 @@ python train_seal.py \
     --teacher_temp 0.04 \
     --warmup_teacher_temp_epochs 30 \
     --memax_weight 1 \
-    --exp_name scars_seal \
-    --kl_temp 0.5 \
+    --exp_name aircraft_seal \
+    --kl_temp 1.0 \
     --update_thd 0 \
     --memax_weight_1 0 \
     --memax_weight_2 0 \
-    --unsupervised_smoothing 0.75 \
-    --sim_alpha 0.1 \
-    --sim_beta 0 \
-    --sim_gamma 0.1 \
-    --backbone_lr 0.05 \
-    --model_name vit_dino_v2 
+    --unsupervised_smoothing 0.1 \
+    --model_name vit_dino_v2
+
